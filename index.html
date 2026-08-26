@@ -5,12 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Creatine Tracker</title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/creatine-logo.png" />
+
     <!-- iOS: fullscreen gedrag zonder Safari-balken bij "Zet op beginscherm" -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Creatine" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <meta name="theme-color" content="#3F6B52" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F5F1E8" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#161F19" />
 
     <link
       rel="stylesheet"
@@ -18,6 +22,16 @@
     />
   </head>
   <body class="bg-paper">
+    <script>
+      // Voorkomt een lichte flits bij laden: zet de dark class al vóór React rendert
+      (function () {
+        var stored = localStorage.getItem('creatine-theme')
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (stored === 'dark' || (!stored && prefersDark)) {
+          document.documentElement.classList.add('dark')
+        }
+      })()
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
