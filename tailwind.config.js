@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: ['./index.html', './src/**/*.{js,jsx}'],
   theme: {
     extend: {
@@ -15,7 +16,16 @@ export default {
           DEFAULT: '#B0562E',
           light: '#C97A3E'
         },
-        line: '#DFD9C8'
+        line: '#DFD9C8',
+        // Donker thema — zelfde familie, verdiept ipv omgekeerd naar zwart/wit
+        night: {
+          paper: '#161F19',
+          ink: '#EDE8DB',
+          card: '#1E2A22',
+          line: '#2B3A30',
+          moss: '#6FA582',
+          rust: '#E08F5C'
+        }
       },
       fontFamily: {
         display: ['"Fraunces"', 'serif'],

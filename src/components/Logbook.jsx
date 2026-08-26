@@ -46,18 +46,18 @@ export default function Logbook({ entries }) {
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={() => changeMonth(-1)}
-          className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/60 text-ink transition-colors"
+          className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/60 dark:hover:bg-white/10 text-ink dark:text-night-ink transition-colors"
           aria-label="Vorige maand"
         >
           ←
         </button>
-        <p className="font-display text-lg text-ink">
+        <p className="font-display text-lg text-ink dark:text-night-ink">
           {MONTHS[displayedMonth.getMonth()]} {displayedMonth.getFullYear()}
         </p>
         <button
           onClick={() => changeMonth(1)}
           disabled={isCurrentMonth}
-          className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/60 text-ink transition-colors disabled:opacity-20 disabled:hover:bg-transparent"
+          className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/60 dark:hover:bg-white/10 text-ink dark:text-night-ink transition-colors disabled:opacity-20 disabled:hover:bg-transparent"
           aria-label="Volgende maand"
         >
           →
@@ -66,7 +66,7 @@ export default function Logbook({ entries }) {
 
       <div className="grid grid-cols-7 mb-2">
         {WEEKDAYS.map((day) => (
-          <div key={day} className="text-center text-xs font-mono text-ink/40 uppercase">
+          <div key={day} className="text-center text-xs font-mono text-ink/40 dark:text-night-ink/40 uppercase">
             {day}
           </div>
         ))}
@@ -85,9 +85,11 @@ export default function Logbook({ entries }) {
             <div
               key={idx}
               className={`aspect-square flex flex-col items-center justify-center rounded-lg text-sm
-                ${isToday ? 'bg-moss/15 border border-moss/40' : 'border border-transparent'}`}
+                ${isToday
+                  ? 'bg-moss/15 dark:bg-night-moss/20 border border-moss/40 dark:border-night-moss/50'
+                  : 'border border-transparent'}`}
             >
-              <span className="text-ink/70">{date.getDate()}</span>
+              <span className="text-ink/70 dark:text-night-ink/70">{date.getDate()}</span>
               <span className="text-xs mt-0.5">
                 {isFuture ? '' : status === 'taken' ? '✅' : status === 'skipped' ? '❌' : '–'}
               </span>
