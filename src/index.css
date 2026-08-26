@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  color: #20281F;
+  background-image:
+    linear-gradient(#DFD9C8 1px, transparent 1px),
+    linear-gradient(90deg, #DFD9C8 1px, transparent 1px);
+  background-size: 28px 28px;
+  background-position: -1px -1px;
+}
+
+/* Toetsenbord-focus blijft zichtbaar (toegankelijkheid) */
+:focus-visible {
+  outline: 2px solid #3F6B52;
+  outline-offset: 2px;
+}
