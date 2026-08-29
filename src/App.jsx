@@ -2,10 +2,12 @@ import { useState } from 'react'
 import { useCreatineStore } from './useCreatineStore.js'
 import { useDarkMode } from './useDarkMode.js'
 import { useInstallPrompt } from './useInstallPrompt.js'
+import { useSWUpdate } from './useSWUpdate.js'
 import Home from './components/Home.jsx'
 import Logbook from './components/Logbook.jsx'
 import NavBar from './components/NavBar.jsx'
 import InstallBanner from './components/InstallBanner.jsx'
+import UpdateBanner from './components/UpdateBanner.jsx'
 
 export default function App() {
   const [tab, setTab] = useState('home')
@@ -22,6 +24,7 @@ export default function App() {
   } = useCreatineStore()
   const { isDark, toggle } = useDarkMode()
   const { platform, shouldShow, promptInstall, dismiss } = useInstallPrompt()
+  const { needRefresh, applyUpdate } = useSWUpdate()
 
   return (
     <div className="min-h-screen flex flex-col dark:bg-night-paper">
@@ -37,6 +40,8 @@ export default function App() {
           {isDark ? '☀️' : '🌙'}
         </button>
       </header>
+
+      {needRefresh && <UpdateBanner onRefresh={applyUpdate} />}
 
       {shouldShow && (
         <InstallBanner platform={platform} promptInstall={promptInstall} dismiss={dismiss} />
