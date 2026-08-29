@@ -31,6 +31,12 @@ export default {
         display: ['"Fraunces"', 'serif'],
         body: ['"Inter"', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace']
+      },
+      keyframes: {
+        slideUp: {
+          '0%': { transform: 'translateY(16px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' }
+        }
       }
     }
   },

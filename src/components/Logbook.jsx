@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { todayKey } from '../useCreatineStore.js'
+import DayEditor from './DayEditor.jsx'
 
 const WEEKDAYS = ['ma', 'di', 'wo', 'do', 'vr', 'za', 'zo']
 const MONTHS = [
@@ -24,8 +24,9 @@ function buildMonthGrid(monthDate) {
   return cells
 }
 
-export default function Logbook({ entries }) {
+export default function Logbook({ entries, setDayEntry, defaultDose }) {
   const [displayedMonth, setDisplayedMonth] = useState(startOfMonth(new Date()))
+  const [selectedDate, setSelectedDate] = useState(null)
 
   const isCurrentMonth =
     displayedMonth.getFullYear() === new Date().getFullYear() &&
@@ -40,6 +41,8 @@ export default function Logbook({ entries }) {
       setDisplayedMonth(next)
     }
   }
+
+  const selectedEntry = selectedDate ? entries[formatKey(selectedDate)] : null
 
   return (
     <div className="flex-1 px-6 pt-6 pb-4 max-w-md mx-auto w-full">
@@ -76,27 +79,50 @@ export default function Logbook({ entries }) {
         {cells.map((date, idx) => {
           if (!date) return <div key={idx} />
 
-          const key = date.toISOString ? formatKey(date) : null
           const isFuture = date > today && formatKey(date) !== formatKey(today)
           const isToday = formatKey(date) === formatKey(today)
-          const status = entries[formatKey(date)]
+          const entry = entries[formatKey(date)]
+          const status = entry?.status ?? null
+          const amount = entry?.amount ?? null
 
           return (
-            <div
+            <button
               key={idx}
-              className={`aspect-square flex flex-col items-center justify-center rounded-lg text-sm
+              onClick={() => !isFuture && setSelectedDate(date)}
+              disabled={isFuture}
+              className={`aspect-square flex flex-col items-center justify-center rounded-lg text-sm transition-colors
                 ${isToday
                   ? 'bg-moss/15 dark:bg-night-moss/20 border border-moss/40 dark:border-night-moss/50'
-                  : 'border border-transparent'}`}
+                  : 'border border-transparent'}
+                ${isFuture ? 'cursor-default' : 'cursor-pointer hover:bg-black/5 dark:hover:bg-white/10 active:scale-95'}`}
             >
               <span className="text-ink/70 dark:text-night-ink/70">{date.getDate()}</span>
-              <span className="text-xs mt-0.5">
+              <span className="text-xs leading-none mt-0.5">
                 {isFuture ? '' : status === 'taken' ? '✅' : status === 'skipped' ? '❌' : '–'}
               </span>
-            </div>
+              {!isFuture && status === 'taken' && amount !== null && (
+                <span className="text-[9px] leading-none mt-0.5 font-mono text-moss-dark/70 dark:text-night-moss/80">
+                  {amount}g
+                </span>
+              )}
+            </button>
           )
         })}
       </div>
+
+      {selectedDate && (
+        <DayEditor
+          date={selectedDate}
+          currentStatus={selectedEntry?.status ?? null}
+          currentAmount={selectedEntry?.amount ?? null}
+          defaultDose={defaultDose}
+          onSelect={(status, amount) => {
+            setDayEntry(formatKey(selectedDate), status, amount)
+            setSelectedDate(null)
+          }}
+          onClose={() => setSelectedDate(null)}
+        />
+      )}
     </div>
   )
 }
