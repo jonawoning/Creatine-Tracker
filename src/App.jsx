@@ -9,7 +9,17 @@ import InstallBanner from './components/InstallBanner.jsx'
 
 export default function App() {
   const [tab, setTab] = useState('home')
-  const { entries, todayStatus, markToday, resetToday, currentStreak } = useCreatineStore()
+  const {
+    entries,
+    todayStatus,
+    todayAmount,
+    defaultDose,
+    markTakenToday,
+    markSkippedToday,
+    resetToday,
+    currentStreak,
+    setDayEntry
+  } = useCreatineStore()
   const { isDark, toggle } = useDarkMode()
   const { platform, shouldShow, promptInstall, dismiss } = useInstallPrompt()
 
@@ -35,13 +45,18 @@ export default function App() {
       {tab === 'home' && (
         <Home
           todayStatus={todayStatus}
-          markToday={markToday}
+          todayAmount={todayAmount}
+          defaultDose={defaultDose}
+          markTakenToday={markTakenToday}
+          markSkippedToday={markSkippedToday}
           resetToday={resetToday}
           currentStreak={currentStreak}
         />
       )}
 
-      {tab === 'logbook' && <Logbook entries={entries} />}
+      {tab === 'logbook' && (
+        <Logbook entries={entries} setDayEntry={setDayEntry} defaultDose={defaultDose} />
+      )}
 
       <NavBar active={tab} onChange={setTab} />
     </div>

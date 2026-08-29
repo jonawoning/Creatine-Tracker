@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 
-const STORAGE_KEY = 'creatine-entries'
+const ENTRIES_KEY = 'creatine-entries'
+const DOSE_KEY = 'creatine-default-dose'
 
 function todayKey(date = new Date()) {
   // yyyy-MM-dd in lokale tijd (geen UTC-verschuiving)
@@ -10,63 +11,114 @@ function todayKey(date = new Date()) {
   return `${y}-${m}-${d}`
 }
 
+/** Normaliseert oude entries (platte strings) naar het { status, amount } formaat. */
+function normalize(raw) {
+  const out = {}
+  for (const [key, value] of Object.entries(raw)) {
+    if (typeof value === 'string') {
+      out[key] = { status: value, amount: null }
+    } else if (value && typeof value === 'object') {
+      out[key] = { status: value.status, amount: value.amount ?? null }
+    }
+  }
+  return out
+}
+
 function loadEntries() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : {}
+    const raw = localStorage.getItem(ENTRIES_KEY)
+    return raw ? normalize(JSON.parse(raw)) : {}
   } catch {
     return {}
   }
 }
 
+function loadDefaultDose() {
+  const raw = localStorage.getItem(DOSE_KEY)
+  const num = raw ? Number(raw) : null
+  return Number.isFinite(num) ? num : null
+}
+
 export function useCreatineStore() {
   const [entries, setEntries] = useState(loadEntries)
+  const [defaultDose, setDefaultDoseState] = useState(loadDefaultDose)
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries))
+    localStorage.setItem(ENTRIES_KEY, JSON.stringify(entries))
   }, [entries])
 
-  const setStatus = useCallback((dateKey, status) => {
+  useEffect(() => {
+    if (defaultDose === null) {
+      localStorage.removeItem(DOSE_KEY)
+    } else {
+      localStorage.setItem(DOSE_KEY, String(defaultDose))
+    }
+  }, [defaultDose])
+
+  /** Generieke setter, gebruikt door zowel het Vandaag-scherm als het logboek. */
+  const setDayEntry = useCallback((dateKey, status, amount = null) => {
     setEntries((prev) => {
       const next = { ...prev }
       if (status === null) {
         delete next[dateKey]
       } else {
-        next[dateKey] = status
+        next[dateKey] = { status, amount: status === 'taken' ? amount : null }
       }
       return next
     })
   }, [])
 
-  const markToday = useCallback(
-    (status) => setStatus(todayKey(), status),
-    [setStatus]
+  const setDefaultDose = useCallback((amount) => {
+    setDefaultDoseState(Number.isFinite(amount) ? amount : null)
+  }, [])
+
+  const markTakenToday = useCallback(
+    (amount) => {
+      setDayEntry(todayKey(), 'taken', amount)
+      setDefaultDose(amount)
+    },
+    [setDayEntry, setDefaultDose]
   )
 
-  const resetToday = useCallback(() => setStatus(todayKey(), null), [setStatus])
+  const markSkippedToday = useCallback(() => {
+    setDayEntry(todayKey(), 'skipped')
+  }, [setDayEntry])
 
-  const todayStatus = entries[todayKey()] ?? null
+  const resetToday = useCallback(() => setDayEntry(todayKey(), null), [setDayEntry])
+
+  const todayEntry = entries[todayKey()] ?? null
+  const todayStatus = todayEntry?.status ?? null
+  const todayAmount = todayEntry?.amount ?? null
 
   // Streak: aantal opeenvolgende dagen tot en met vandaag/gisteren met status 'taken'
   const currentStreak = (() => {
     let streak = 0
     let cursor = new Date()
+    const statusAt = (d) => entries[todayKey(d)]?.status ?? null
 
-    // Als vandaag nog niet is ingevuld, telt vandaag niet mee, begin bij gisteren
-    if (!entries[todayKey(cursor)] || entries[todayKey(cursor)] === 'skipped') {
-      if (entries[todayKey(cursor)] !== 'taken') {
-        cursor.setDate(cursor.getDate() - 1)
-      }
+    if (statusAt(cursor) !== 'taken') {
+      cursor.setDate(cursor.getDate() - 1)
     }
 
-    while (entries[todayKey(cursor)] === 'taken') {
+    while (statusAt(cursor) === 'taken') {
       streak += 1
       cursor.setDate(cursor.getDate() - 1)
     }
     return streak
   })()
 
-  return { entries, todayKey: todayKey(), todayStatus, markToday, resetToday, setStatus, currentStreak }
+  return {
+    entries,
+    todayKey: todayKey(),
+    todayStatus,
+    todayAmount,
+    defaultDose,
+    markTakenToday,
+    markSkippedToday,
+    resetToday,
+    setDayEntry,
+    currentStreak
+  }
 }
 
 export { todayKey }
