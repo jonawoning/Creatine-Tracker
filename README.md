@@ -1,8 +1,5 @@
 # Creatine Tracker (React + Vite + Tailwind, PWA)
 
-## Demo
-- You can use the demo on this website: [demo site](https://creatine-tracker-vert.vercel.app/)
-
 ## 1. Vereisten
 - [Node.js](https://nodejs.org) (LTS-versie) op je Windows-pc.
 
