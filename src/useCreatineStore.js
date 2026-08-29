@@ -55,29 +55,38 @@ export function useCreatineStore() {
     }
   }, [defaultDose])
 
-  /** Generieke setter, gebruikt door zowel het Vandaag-scherm als het logboek. */
-  const setDayEntry = useCallback((dateKey, status, amount = null) => {
-    setEntries((prev) => {
-      const next = { ...prev }
-      if (status === null) {
-        delete next[dateKey]
-      } else {
-        next[dateKey] = { status, amount: status === 'taken' ? amount : null }
-      }
-      return next
-    })
-  }, [])
-
   const setDefaultDose = useCallback((amount) => {
     setDefaultDoseState(Number.isFinite(amount) ? amount : null)
   }, [])
 
-  const markTakenToday = useCallback(
-    (amount) => {
-      setDayEntry(todayKey(), 'taken', amount)
-      setDefaultDose(amount)
+  /**
+   * Generieke setter, gebruikt door zowel het Vandaag-scherm als het logboek.
+   * Werkt ook meteen de "onthouden" standaarddosis bij, zodat een aanpassing
+   * in het logboek net zo goed als nieuwe standaard geldt als een check-in
+   * via het Vandaag-scherm.
+   */
+  const setDayEntry = useCallback(
+    (dateKey, status, amount = null) => {
+      setEntries((prev) => {
+        const next = { ...prev }
+        if (status === null) {
+          delete next[dateKey]
+        } else {
+          next[dateKey] = { status, amount: status === 'taken' ? amount : null }
+        }
+        return next
+      })
+
+      if (status === 'taken' && Number.isFinite(amount) && amount > 0) {
+        setDefaultDose(amount)
+      }
     },
-    [setDayEntry, setDefaultDose]
+    [setDefaultDose]
+  )
+
+  const markTakenToday = useCallback(
+    (amount) => setDayEntry(todayKey(), 'taken', amount),
+    [setDayEntry]
   )
 
   const markSkippedToday = useCallback(() => {
